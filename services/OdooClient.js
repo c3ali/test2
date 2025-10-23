@@ -1,19 +1,51 @@
 import axios from 'axios';
 
 /**
- * Client pour communiquer avec l'API Odoo via JSON-RPC
+ * Client pour communiquer avec l'API Odoo SaaS (version en ligne) via JSON-RPC
+ * Compatible avec Odoo Online - pas besoin d'accès direct à la base de données
  */
 class OdooClient {
   constructor(url, database, username, password) {
-    this.url = url;
+    // Nettoyer et formater l'URL
+    this.url = url.trim().replace(/\/$/, ''); // Enlever le / final si présent
     this.database = database;
     this.username = username;
     this.password = password;
     this.uid = null;
+    this.sessionId = null;
+
+    // Créer une instance axios avec gestion des cookies pour Odoo SaaS
+    this.axiosInstance = axios.create({
+      baseURL: this.url,
+      timeout: 30000, // 30 secondes
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      withCredentials: false, // Odoo SaaS gère les sessions via session_id
+    });
   }
 
   /**
-   * Authentification auprès d'Odoo
+   * Teste la connexion à l'instance Odoo SaaS
+   */
+  async testConnection() {
+    try {
+      const response = await this.axiosInstance.post('/web/database/list', {
+        jsonrpc: '2.0',
+        method: 'call',
+        params: {},
+        id: Math.floor(Math.random() * 1000000),
+      });
+
+      return response.status === 200;
+    } catch (error) {
+      console.error('Erreur de connexion:', error);
+      throw new Error('Impossible de se connecter à l\'instance Odoo. Vérifiez l\'URL.');
+    }
+  }
+
+  /**
+   * Authentification auprès d'Odoo SaaS
    */
   async authenticate() {
     try {
@@ -25,42 +57,59 @@ class OdooClient {
 
       if (response.result && response.result.uid) {
         this.uid = response.result.uid;
+        this.sessionId = response.result.session_id;
+
+        console.log('✓ Authentification réussie pour l\'utilisateur:', this.username);
+        console.log('✓ Base de données:', this.database);
+        console.log('✓ UID:', this.uid);
+
         return true;
       }
-      return false;
+
+      throw new Error('Identifiants incorrects ou base de données introuvable');
     } catch (error) {
       console.error('Erreur d\'authentification:', error);
-      throw new Error('Échec de l\'authentification Odoo');
+
+      if (error.message.includes('CORS')) {
+        throw new Error('Erreur CORS. Vérifiez que votre instance Odoo autorise les connexions depuis l\'application mobile.');
+      } else if (error.message.includes('Network')) {
+        throw new Error('Erreur réseau. Vérifiez votre connexion Internet et l\'URL de votre instance Odoo.');
+      } else if (error.response?.status === 404) {
+        throw new Error('URL Odoo incorrecte. Vérifiez que l\'URL de votre instance est valide.');
+      } else if (error.message.includes('introuvable')) {
+        throw new Error('Base de données introuvable ou identifiants incorrects.');
+      }
+
+      throw new Error(`Échec de l'authentification : ${error.message}`);
     }
   }
 
   /**
-   * Effectue un appel JSON-RPC vers Odoo
+   * Effectue un appel JSON-RPC vers Odoo SaaS
    */
   async call(endpoint, params) {
     try {
-      const response = await axios.post(
-        `${this.url}${endpoint}`,
-        {
-          jsonrpc: '2.0',
-          method: 'call',
-          params: params,
-          id: Math.floor(Math.random() * 1000000),
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await this.axiosInstance.post(endpoint, {
+        jsonrpc: '2.0',
+        method: 'call',
+        params: params,
+        id: Math.floor(Math.random() * 1000000),
+      });
 
       if (response.data.error) {
-        throw new Error(response.data.error.data.message);
+        const errorMsg = response.data.error.data?.message || response.data.error.message || 'Erreur inconnue';
+        console.error('Erreur Odoo:', errorMsg);
+        throw new Error(errorMsg);
       }
 
       return response.data;
     } catch (error) {
-      console.error('Erreur d\'appel API:', error);
+      if (error.response?.data?.error) {
+        const errorMsg = error.response.data.error.data?.message || error.response.data.error.message;
+        throw new Error(errorMsg);
+      }
+
+      console.error('Erreur d\'appel API:', error.message);
       throw error;
     }
   }

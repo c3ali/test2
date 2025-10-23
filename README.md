@@ -1,21 +1,29 @@
 # Odoo Mobile Assistant
 
-Application mobile iOS et Android qui permet de communiquer avec votre base de données Odoo en ligne et de lui poser des questions en langage naturel.
+Application mobile iOS et Android qui permet de communiquer avec votre **instance Odoo SaaS (Odoo Online)** et de lui poser des questions en langage naturel.
+
+## ⚡ Pour Odoo SaaS (Version en ligne)
+
+Cette application est conçue pour **Odoo Online / Odoo SaaS**. Vous N'AVEZ PAS BESOIN d'accès direct à la base de données PostgreSQL. L'application communique uniquement via l'API JSON-RPC d'Odoo.
+
+**📖 [Guide détaillé de configuration Odoo SaaS](./ODOO_SAAS_SETUP.md)**
 
 ## Fonctionnalités
 
-- **Communication avec Odoo** : Connexion sécurisée à votre instance Odoo via API JSON-RPC
+- **Communication avec Odoo SaaS** : Connexion sécurisée à votre instance Odoo en ligne via API JSON-RPC
 - **Interface de chat intuitive** : Posez vos questions en langage naturel
 - **Interprétation intelligente** : Le système analyse vos questions et interroge les bons modèles Odoo
+- **Test de connexion** : Testez votre configuration avant de l'enregistrer
 - **Multiplateforme** : Fonctionne sur iOS et Android
 - **Recherches avancées** : Support de différents modèles Odoo (clients, commandes, produits, factures, etc.)
+- **100% sécurisé** : Vos identifiants restent sur votre appareil
 
 ## Prérequis
 
 - Node.js (version 14 ou supérieure)
 - npm ou yarn
 - Expo CLI (`npm install -g expo-cli`)
-- Un compte Odoo avec accès API
+- **Un compte Odoo Online** (https://www.odoo.com)
 
 ## Installation
 
@@ -39,16 +47,30 @@ Cela ouvrira Expo DevTools dans votre navigateur.
 
 ## Utilisation
 
-### Premier lancement
+### Configuration Odoo SaaS
 
 1. Lancez l'application sur votre appareil ou émulateur
-2. Configurez votre connexion Odoo :
-   - **URL Odoo** : L'URL de votre instance (ex: https://votre-instance.odoo.com)
-   - **Base de données** : Le nom de votre base de données Odoo
+2. Remplissez les informations de connexion :
+   - **URL Odoo** : L'URL de votre instance (ex: https://monentreprise.odoo.com)
+   - **Base de données** : Le nom de votre base de données (souvent identique à votre sous-domaine)
    - **Nom d'utilisateur** : Votre email de connexion Odoo
    - **Mot de passe** : Votre mot de passe Odoo
 
-3. Cliquez sur "Enregistrer"
+3. Cliquez sur **"🔌 Tester la connexion"** pour vérifier que tout fonctionne
+
+4. Si le test réussit, cliquez sur **"✓ Enregistrer et continuer"**
+
+**📖 Guide détaillé : [ODOO_SAAS_SETUP.md](./ODOO_SAAS_SETUP.md)**
+
+### Trouver vos informations Odoo
+
+**URL :** L'adresse que vous utilisez dans votre navigateur pour accéder à Odoo
+- Exemple : `https://monentreprise.odoo.com`
+
+**Base de données :** Généralement le même nom que votre sous-domaine
+- Pour trouver le nom exact, connectez-vous à Odoo et tapez dans la console : `odoo.session_info.db`
+
+**Identifiants :** Les mêmes que vous utilisez pour vous connecter via le navigateur
 
 ### Poser des questions
 
@@ -151,23 +173,37 @@ Les styles sont définis dans chaque fichier de screen. Vous pouvez modifier les
 
 ## Dépannage
 
-### Erreur d'authentification
+### ❌ Impossible de se connecter
 
-- Vérifiez que votre URL Odoo est correcte (avec https://)
-- Assurez-vous que votre utilisateur a les droits API
-- Vérifiez que le nom de la base de données est correct
+**Solutions :**
+1. Vérifiez que l'URL commence par `https://` et n'a pas de `/` final
+2. Testez l'URL dans votre navigateur - elle doit être accessible
+3. Vérifiez votre connexion Internet
+4. Essayez de passer du WiFi aux données mobiles ou vice versa
 
-### Erreur de connexion
+### ❌ Identifiants incorrects
 
-- Vérifiez votre connexion internet
-- Assurez-vous que votre instance Odoo est accessible
-- Vérifiez que l'API JSON-RPC est activée sur votre instance
+**Solutions :**
+1. Vérifiez que vous pouvez vous connecter via le navigateur avec ces mêmes identifiants
+2. Vérifiez que le nom de la base de données est correct (voir [ODOO_SAAS_SETUP.md](./ODOO_SAAS_SETUP.md))
+3. Assurez-vous qu'il n'y a pas d'espaces avant/après vos identifiants
 
-### Aucun résultat
+### ❌ Erreur d'authentification
 
-- Essayez de reformuler votre question
-- Vérifiez que le modèle interrogé contient des données
-- Assurez-vous d'avoir les droits de lecture sur le modèle
+**Solutions :**
+- Utilisez le bouton "🔌 Tester la connexion" pour identifier le problème
+- Vérifiez que votre abonnement Odoo est actif
+- Assurez-vous que votre utilisateur a accès à l'API (activé par défaut sur Odoo Online)
+
+### ❌ Aucun résultat trouvé
+
+**Solutions :**
+- Vérifiez que vous avez des données dans votre Odoo
+- Reformulez votre question (voir [EXAMPLES.md](./EXAMPLES.md))
+- Vérifiez que vous avez les droits de lecture sur le modèle interrogé
+- Essayez une question plus simple : "Affiche les clients"
+
+**Pour plus de détails :** Consultez le [Guide de configuration Odoo SaaS](./ODOO_SAAS_SETUP.md)
 
 ## Support
 

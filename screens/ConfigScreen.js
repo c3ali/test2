@@ -12,6 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import OdooClient from '../services/OdooClient';
 
 const ConfigScreen = ({ navigation }) => {
   const [url, setUrl] = useState('');
@@ -20,6 +21,7 @@ const ConfigScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingConfig, setLoadingConfig] = useState(true);
+  const [testing, setTesting] = useState(false);
 
   useEffect(() => {
     loadConfig();
@@ -45,6 +47,36 @@ const ConfigScreen = ({ navigation }) => {
       console.error('Erreur lors du chargement de la configuration:', error);
     } finally {
       setLoadingConfig(false);
+    }
+  };
+
+  const testConnection = async () => {
+    if (!url || !database || !username || !password) {
+      Alert.alert('Erreur', 'Veuillez remplir tous les champs avant de tester la connexion');
+      return;
+    }
+
+    setTesting(true);
+
+    try {
+      const client = new OdooClient(url, database, username, password);
+
+      // Tester l'authentification
+      await client.authenticate();
+
+      Alert.alert(
+        'Connexion réussie !',
+        `Vous êtes connecté à Odoo en tant que ${username}.\n\nVous pouvez maintenant enregistrer la configuration.`,
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      Alert.alert(
+        'Échec de la connexion',
+        error.message || 'Impossible de se connecter à Odoo. Vérifiez vos paramètres.',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setTesting(false);
     }
   };
 
@@ -96,15 +128,24 @@ const ConfigScreen = ({ navigation }) => {
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.title}>Configuration Odoo</Text>
+          <Text style={styles.title}>Configuration Odoo SaaS</Text>
           <Text style={styles.subtitle}>
-            Configurez votre connexion à Odoo
+            Connectez-vous à votre instance Odoo en ligne
+          </Text>
+        </View>
+
+        <View style={styles.infoBox}>
+          <Text style={styles.infoBoxTitle}>ℹ️ Pour Odoo Online (SaaS)</Text>
+          <Text style={styles.infoBoxText}>
+            • URL : https://votre-domaine.odoo.com{'\n'}
+            • Base de données : souvent le même nom que votre domaine{'\n'}
+            • Utilisez vos identifiants Odoo habituels
           </Text>
         </View>
 
         <View style={styles.form}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>URL Odoo</Text>
+            <Text style={styles.label}>URL Odoo *</Text>
             <TextInput
               style={styles.input}
               placeholder="https://votre-instance.odoo.com"
@@ -114,10 +155,13 @@ const ConfigScreen = ({ navigation }) => {
               autoCorrect={false}
               keyboardType="url"
             />
+            <Text style={styles.helperText}>
+              L'URL complète de votre instance Odoo SaaS
+            </Text>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Base de données</Text>
+            <Text style={styles.label}>Base de données *</Text>
             <TextInput
               style={styles.input}
               placeholder="nom_de_la_base"
@@ -126,10 +170,13 @@ const ConfigScreen = ({ navigation }) => {
               autoCapitalize="none"
               autoCorrect={false}
             />
+            <Text style={styles.helperText}>
+              Le nom de votre base de données Odoo
+            </Text>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Nom d'utilisateur</Text>
+            <Text style={styles.label}>Nom d'utilisateur *</Text>
             <TextInput
               style={styles.input}
               placeholder="votre@email.com"
@@ -139,10 +186,13 @@ const ConfigScreen = ({ navigation }) => {
               autoCorrect={false}
               keyboardType="email-address"
             />
+            <Text style={styles.helperText}>
+              Votre email de connexion Odoo
+            </Text>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Mot de passe</Text>
+            <Text style={styles.label}>Mot de passe *</Text>
             <TextInput
               style={styles.input}
               placeholder="Votre mot de passe"
@@ -152,22 +202,38 @@ const ConfigScreen = ({ navigation }) => {
               autoCapitalize="none"
               autoCorrect={false}
             />
+            <Text style={styles.helperText}>
+              Votre mot de passe Odoo
+            </Text>
           </View>
+
+          <TouchableOpacity
+            style={[styles.testButton, testing && styles.buttonDisabled]}
+            onPress={testConnection}
+            disabled={testing || loading}
+          >
+            {testing ? (
+              <ActivityIndicator color="#714B67" />
+            ) : (
+              <Text style={styles.testButtonText}>🔌 Tester la connexion</Text>
+            )}
+          </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.button, loading && styles.buttonDisabled]}
             onPress={saveConfig}
-            disabled={loading}
+            disabled={loading || testing}
           >
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Enregistrer</Text>
+              <Text style={styles.buttonText}>✓ Enregistrer et continuer</Text>
             )}
           </TouchableOpacity>
 
           <Text style={styles.infoText}>
-            Vos informations sont stockées localement sur votre appareil de manière sécurisée.
+            🔒 Vos informations sont stockées localement et en sécurité sur votre appareil.
+            Elles ne sont partagées qu'avec votre instance Odoo.
           </Text>
         </View>
       </ScrollView>
@@ -206,6 +272,25 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
   },
+  infoBox: {
+    backgroundColor: '#E8F4FD',
+    borderLeftWidth: 4,
+    borderLeftColor: '#2196F3',
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 20,
+  },
+  infoBoxTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1976D2',
+    marginBottom: 8,
+  },
+  infoBoxText: {
+    fontSize: 14,
+    color: '#555',
+    lineHeight: 22,
+  },
   form: {
     flex: 1,
   },
@@ -226,12 +311,32 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
   },
+  helperText: {
+    fontSize: 13,
+    color: '#888',
+    marginTop: 5,
+    fontStyle: 'italic',
+  },
+  testButton: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 20,
+    borderWidth: 2,
+    borderColor: '#714B67',
+  },
+  testButtonText: {
+    color: '#714B67',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
   button: {
     backgroundColor: '#714B67',
     borderRadius: 10,
     padding: 16,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 15,
   },
   buttonDisabled: {
     opacity: 0.6,
@@ -243,10 +348,10 @@ const styles = StyleSheet.create({
   },
   infoText: {
     marginTop: 20,
-    fontSize: 14,
-    color: '#999',
+    fontSize: 13,
+    color: '#888',
     textAlign: 'center',
-    fontStyle: 'italic',
+    lineHeight: 20,
   },
 });
 
