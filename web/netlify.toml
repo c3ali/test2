@@ -1,3 +1,9 @@
+# Pas de build requis - ce sont des fichiers HTML/JS statiques
+[build]
+  command = "echo 'No build needed - static HTML'"
+  publish = "."
+
+# Headers CORS pour connexion Odoo
 [[headers]]
   for = "/*"
   [headers.values]
