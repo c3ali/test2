@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic Connexion Odoo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #714B67;
+        }
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #714B67;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d1e7dd;
+            border-left-color: #198754;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .info {
+            background: #cfe2ff;
+            border-left-color: #0d6efd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #714B67;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #5d3c54;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .hidden {
+            display: none;
+        }
+        pre {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .test-result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid;
+        }
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnostic Connexion Odoo</h1>
+        <p>Cette page va nous aider à identifier pourquoi la connexion échoue.</p>
+
+        <div class="info">
+            <strong>ℹ️ Important :</strong> Cette page teste DIRECTEMENT votre instance Odoo depuis votre navigateur.
+            Si ça marche ici mais pas dans l'application, on saura d'où vient le problème.
+        </div>
+
+        <!-- Étape 1 -->
+        <div class="step">
+            <h3>📋 Étape 1 : Entrez vos informations Odoo</h3>
+
+            <label><strong>URL Odoo :</strong></label>
+            <input type="text" id="url" placeholder="https://votre-instance.odoo.com" value="">
+            <small style="color: #666;">Sans slash (/) à la fin</small>
+
+            <label><strong>Base de données :</strong></label>
+            <input type="text" id="database" placeholder="nom_de_la_base" value="">
+
+            <label><strong>Email :</strong></label>
+            <input type="email" id="username" placeholder="votre@email.com" value="">
+
+            <label><strong>Mot de passe :</strong></label>
+            <input type="password" id="password" placeholder="Votre mot de passe" value="">
+        </div>
+
+        <!-- Étape 2 -->
+        <div class="step">
+            <h3>🔗 Étape 2 : Vérifier le format de l'URL</h3>
+            <button onclick="checkUrlFormat()">Vérifier le format</button>
+            <div id="urlResult" class="hidden"></div>
+        </div>
+
+        <!-- Étape 3 -->
+        <div class="step">
+            <h3>🌐 Étape 3 : Tester l'accessibilité</h3>
+            <button onclick="testAccessibility()">Tester si Odoo est accessible</button>
+            <div id="accessResult" class="hidden"></div>
+        </div>
+
+        <!-- Étape 4 -->
+        <div class="step">
+            <h3>🔑 Étape 4 : Tester l'authentification</h3>
+            <button onclick="testAuthentication()">Tester la connexion complète</button>
+            <div id="authResult" class="hidden"></div>
+        </div>
+
+        <!-- Étape 5 -->
+        <div class="step">
+            <h3>📊 Étape 5 : Informations système</h3>
+            <button onclick="showSystemInfo()">Afficher les infos</button>
+            <div id="systemInfo" class="hidden"></div>
+        </div>
+
+        <!-- Résumé -->
+        <div id="summary" class="hidden step">
+            <h3>📝 Résumé du diagnostic</h3>
+            <div id="summaryContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let diagnosticResults = {
+            urlFormat: null,
+            accessibility: null,
+            authentication: null
+        };
+
+        function checkUrlFormat() {
+            const url = document.getElementById('url').value.trim();
+            const database = document.getElementById('database').value.trim();
+            const resultDiv = document.getElementById('urlResult');
+            resultDiv.classList.remove('hidden');
+
+            let errors = [];
+            let warnings = [];
+            let success = [];
+
+            // Vérifier URL
+            if (!url) {
+                errors.push('❌ L\'URL est vide');
+            } else {
+                if (!url.startsWith('https://')) {
+                    errors.push('❌ L\'URL doit commencer par <code>https://</code> (pas http://)');
+                } else {
+                    success.push('✅ L\'URL commence bien par https://');
+                }
+
+                if (url.endsWith('/')) {
+                    warnings.push('⚠️ L\'URL ne doit pas se terminer par /');
+                } else {
+                    success.push('✅ L\'URL ne se termine pas par /');
+                }
+
+                if (url.includes('/web')) {
+                    warnings.push('⚠️ Enlevez /web de l\'URL');
+                } else {
+                    success.push('✅ L\'URL ne contient pas /web');
+                }
+            }
+
+            // Vérifier base de données
+            if (!database) {
+                errors.push('❌ Le nom de la base de données est vide');
+            } else {
+                if (database.includes(' ')) {
+                    warnings.push('⚠️ Le nom de la base ne doit pas contenir d\'espaces');
+                } else {
+                    success.push('✅ Le nom de la base ne contient pas d\'espaces');
+                }
+            }
+
+            // Afficher résultats
+            let html = '';
+            if (errors.length > 0) {
+                html += '<div class="error">' + errors.join('<br>') + '</div>';
+                diagnosticResults.urlFormat = false;
+            }
+            if (warnings.length > 0) {
+                html += '<div class="warning">' + warnings.join('<br>') + '</div>';
+            }
+            if (success.length > 0) {
+                html += '<div class="success">' + success.join('<br>') + '</div>';
+            }
+            if (errors.length === 0) {
+                diagnosticResults.urlFormat = true;
+                html += '<div class="success"><strong>✅ Format correct !</strong> Passez à l\'étape suivante.</div>';
+            }
+
+            resultDiv.innerHTML = html;
+        }
+
+        async function testAccessibility() {
+            const url = document.getElementById('url').value.trim();
+            const resultDiv = document.getElementById('accessResult');
+            resultDiv.classList.remove('hidden');
+
+            if (!url) {
+                resultDiv.innerHTML = '<div class="error">❌ Veuillez d\'abord entrer une URL</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="info">🔄 Test en cours...</div>';
+
+            try {
+                // Test 1: Ping simple
+                const response = await fetch(url + '/web/database/list', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        method: 'call',
+                        params: {},
+                        id: 1,
+                    }),
+                });
+
+                if (response.ok) {
+                    diagnosticResults.accessibility = true;
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <strong>✅ Votre instance Odoo est accessible !</strong><br>
+                            Status: ${response.status} ${response.statusText}<br>
+                            L'instance répond correctement. Passez à l'étape suivante.
+                        </div>
+                    `;
+                } else {
+                    diagnosticResults.accessibility = false;
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <strong>❌ Odoo répond mais avec une erreur</strong><br>
+                            Status HTTP: ${response.status} ${response.statusText}<br><br>
+                            <strong>Que faire ?</strong><br>
+                            - Vérifiez que l'URL est correcte<br>
+                            - Essayez d'ouvrir l'URL dans un nouvel onglet<br>
+                            - Contactez votre administrateur Odoo
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                diagnosticResults.accessibility = false;
+                let errorHtml = `
+                    <div class="error">
+                        <strong>❌ Impossible de se connecter à Odoo</strong><br><br>
+                        <strong>Erreur :</strong> ${error.message}<br><br>
+                `;
+
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    errorHtml += `
+                        <strong>Causes possibles :</strong><br>
+                        1. <strong>L'URL est incorrecte</strong><br>
+                           → Vérifiez l'URL dans un nouvel onglet<br>
+                           → Assurez-vous que c'est bien https://...<br><br>
+
+                        2. <strong>L'instance Odoo est hors ligne</strong><br>
+                           → Contactez votre administrateur<br>
+                           → Vérifiez sur odoo.com/my/databases<br><br>
+
+                        3. <strong>Problème CORS (même sur Netlify)</strong><br>
+                           → Votre instance Odoo bloque les connexions externes<br>
+                           → C'est rare avec Odoo Online, mais possible<br>
+                           → Contactez le support Odoo<br><br>
+
+                        4. <strong>Vous n'avez pas Internet</strong><br>
+                           → Vérifiez votre connexion<br>
+                    `;
+                } else {
+                    errorHtml += `
+                        <strong>Erreur technique :</strong><br>
+                        <pre>${error.stack || error.toString()}</pre>
+                    `;
+                }
+
+                errorHtml += '</div>';
+                resultDiv.innerHTML = errorHtml;
+            }
+        }
+
+        async function testAuthentication() {
+            const url = document.getElementById('url').value.trim();
+            const database = document.getElementById('database').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const resultDiv = document.getElementById('authResult');
+            resultDiv.classList.remove('hidden');
+
+            if (!url || !database || !username || !password) {
+                resultDiv.innerHTML = '<div class="error">❌ Veuillez remplir tous les champs</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="info">🔄 Test d\'authentification en cours...</div>';
+
+            try {
+                const response = await fetch(url + '/web/session/authenticate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        method: 'call',
+                        params: {
+                            db: database,
+                            login: username,
+                            password: password,
+                        },
+                        id: Math.floor(Math.random() * 1000000),
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.result && data.result.uid) {
+                    diagnosticResults.authentication = true;
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <strong>🎉 CONNEXION RÉUSSIE !</strong><br><br>
+                            ✅ L'authentification fonctionne<br>
+                            ✅ User ID: ${data.result.uid}<br>
+                            ✅ Base de données: ${database}<br><br>
+                            <strong>🎯 CONCLUSION :</strong><br>
+                            Tout fonctionne ! Si l'application principale ne marche pas,
+                            c'est peut-être un problème de cache. Essayez :<br>
+                            1. Rechargez l'application avec Ctrl+Shift+R<br>
+                            2. Videz le cache du navigateur<br>
+                            3. Testez dans un onglet privé
+                        </div>
+                    `;
+                } else if (data.error) {
+                    diagnosticResults.authentication = false;
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <strong>❌ Erreur d'authentification</strong><br><br>
+                            Message: ${data.error.data?.message || data.error.message || 'Erreur inconnue'}<br><br>
+                            <strong>Causes possibles :</strong><br>
+                            1. Mot de passe incorrect<br>
+                            2. Email incorrect<br>
+                            3. Nom de base de données incorrect<br>
+                            4. Utilisateur n'a pas accès à cette base<br><br>
+                            <strong>Solution :</strong><br>
+                            → Vérifiez vos identifiants en vous connectant sur ${url} dans un nouvel onglet
+                        </div>
+                    `;
+                } else {
+                    diagnosticResults.authentication = false;
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <strong>❌ Réponse inattendue</strong><br><br>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                diagnosticResults.authentication = false;
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>❌ Erreur lors du test d'authentification</strong><br><br>
+                        Erreur: ${error.message}<br><br>
+                        Faites d'abord l'Étape 3 pour vérifier que Odoo est accessible.
+                    </div>
+                `;
+            }
+
+            showSummary();
+        }
+
+        function showSystemInfo() {
+            const resultDiv = document.getElementById('systemInfo');
+            resultDiv.classList.remove('hidden');
+
+            const url = document.getElementById('url').value.trim();
+
+            let html = '<div class="info"><strong>Informations système</strong><br><pre>';
+            html += `Navigateur: ${navigator.userAgent}\n`;
+            html += `Langue: ${navigator.language}\n`;
+            html += `En ligne: ${navigator.onLine ? 'Oui' : 'Non'}\n`;
+            html += `Protocole page: ${window.location.protocol}\n`;
+            html += `Hôte page: ${window.location.host || 'local'}\n`;
+            html += `URL testée: ${url || '(non fournie)'}\n`;
+            html += `Date/heure: ${new Date().toLocaleString('fr-FR')}\n`;
+            html += '</pre></div>';
+
+            resultDiv.innerHTML = html;
+        }
+
+        function showSummary() {
+            const summaryDiv = document.getElementById('summary');
+            const contentDiv = document.getElementById('summaryContent');
+
+            summaryDiv.classList.remove('hidden');
+
+            let html = '<strong>État du diagnostic :</strong><br><br>';
+
+            // Format URL
+            if (diagnosticResults.urlFormat === true) {
+                html += '✅ Format URL correct<br>';
+            } else if (diagnosticResults.urlFormat === false) {
+                html += '❌ Format URL incorrect<br>';
+            } else {
+                html += '⏸️ Format URL non testé<br>';
+            }
+
+            // Accessibilité
+            if (diagnosticResults.accessibility === true) {
+                html += '✅ Instance Odoo accessible<br>';
+            } else if (diagnosticResults.accessibility === false) {
+                html += '❌ Instance Odoo non accessible<br>';
+            } else {
+                html += '⏸️ Accessibilité non testée<br>';
+            }
+
+            // Authentification
+            if (diagnosticResults.authentication === true) {
+                html += '✅ Authentification réussie<br>';
+            } else if (diagnosticResults.authentication === false) {
+                html += '❌ Authentification échouée<br>';
+            } else {
+                html += '⏸️ Authentification non testée<br>';
+            }
+
+            html += '<br><strong>Prochaines étapes :</strong><br>';
+
+            if (diagnosticResults.authentication === true) {
+                html += '<div class="success">🎉 Tout fonctionne ! Si l\'application ne marche pas, essayez de vider le cache.</div>';
+            } else if (diagnosticResults.accessibility === false) {
+                html += '<div class="error">Le problème vient de l\'accès à votre instance Odoo. Vérifiez l\'URL ou contactez votre administrateur.</div>';
+            } else if (diagnosticResults.authentication === false) {
+                html += '<div class="error">Le problème vient de vos identifiants. Vérifiez email, mot de passe, et nom de base de données.</div>';
+            } else {
+                html += '<div class="info">Complétez tous les tests ci-dessus pour identifier le problème.</div>';
+            }
+
+            contentDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
