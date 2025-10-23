@@ -2,6 +2,22 @@
 
 Application mobile iOS et Android qui permet de communiquer avec votre **instance Odoo SaaS (Odoo Online)** et de lui poser des questions en langage naturel.
 
+## 🚀 Accès rapide - SANS installation
+
+**Vous pouvez utiliser l'application SANS installer Node.js ou npm sur votre machine !**
+
+### 🌐 Option 1 : Version Web (Accès immédiat)
+Téléchargez le dossier `/web` et ouvrez `index.html` dans votre navigateur.
+**→ [Guide Version Web](./web/README.md)**
+
+### 📱 Option 2 : App Mobile via Expo Go
+Demandez à quelqu'un de lancer `npm start` et scannez le QR code avec Expo Go.
+**→ [Guide Démarrage](./GETTING_STARTED.md)**
+
+**📋 [Voir toutes les options d'accès](./OPTIONS_ACCES.md)**
+
+---
+
 ## ⚡ Pour Odoo SaaS (Version en ligne)
 
 Cette application est conçue pour **Odoo Online / Odoo SaaS**. Vous N'AVEZ PAS BESOIN d'accès direct à la base de données PostgreSQL. L'application communique uniquement via l'API JSON-RPC d'Odoo.
