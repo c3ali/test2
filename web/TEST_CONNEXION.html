@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Connexion Odoo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #714B67;
+            text-align: center;
+        }
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #714B67;
+        }
+        .result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d1e7dd;
+            border: 1px solid #198754;
+            color: #0f5132;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #dc3545;
+            color: #842029;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #664d03;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #714B67;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #5d3c54;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .hidden {
+            display: none;
+        }
+        pre {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Test de Connexion Odoo</h1>
+        <p>Cette page va nous aider à diagnostiquer le problème.</p>
+
+        <div class="step">
+            <h3>Étape 1 : Entrez votre URL Odoo</h3>
+            <input type="text" id="odooUrl" placeholder="https://monentreprise.odoo.com">
+            <button onclick="testStep1()">Tester l'accès à cette URL</button>
+            <div id="result1" class="hidden"></div>
+        </div>
+
+        <div class="step">
+            <h3>Étape 2 : Vérification CORS</h3>
+            <p>Nous allons tester si votre navigateur accepte les requêtes vers Odoo.</p>
+            <button onclick="testStep2()">Tester CORS</button>
+            <div id="result2" class="hidden"></div>
+        </div>
+
+        <div class="step">
+            <h3>Étape 3 : Informations de diagnostic</h3>
+            <button onclick="showDiagnostic()">Afficher le diagnostic</button>
+            <div id="diagnostic" class="hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        function testStep1() {
+            const url = document.getElementById('odooUrl').value.trim();
+            const resultDiv = document.getElementById('result1');
+
+            if (!url) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ Veuillez entrer une URL';
+                resultDiv.classList.remove('hidden');
+                return;
+            }
+
+            // Vérifier le format de l'URL
+            if (!url.startsWith('https://')) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '❌ L\'URL doit commencer par <code>https://</code><br>Exemple: https://monentreprise.odoo.com';
+                resultDiv.classList.remove('hidden');
+                return;
+            }
+
+            if (url.endsWith('/')) {
+                resultDiv.className = 'result warning';
+                resultDiv.innerHTML = '⚠️ L\'URL ne doit pas se terminer par /<br>Enlevez le / à la fin';
+                resultDiv.classList.remove('hidden');
+                return;
+            }
+
+            resultDiv.className = 'result success';
+            resultDiv.innerHTML = '✅ Format de l\'URL correct !<br>Passez à l\'Étape 2';
+            resultDiv.classList.remove('hidden');
+        }
+
+        async function testStep2() {
+            const url = document.getElementById('odooUrl').value.trim();
+            const resultDiv = document.getElementById('result2');
+
+            if (!url) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ Veuillez d\'abord entrer une URL à l\'Étape 1';
+                resultDiv.classList.remove('hidden');
+                return;
+            }
+
+            resultDiv.className = 'result';
+            resultDiv.textContent = '🔄 Test en cours...';
+            resultDiv.classList.remove('hidden');
+
+            try {
+                const response = await fetch(url + '/web/database/list', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        method: 'call',
+                        params: {},
+                        id: 1,
+                    }),
+                });
+
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = '✅ SUCCÈS ! La connexion à Odoo fonctionne !<br><br>Le problème était peut-être temporaire. Retournez à l\'application et retestez la connexion.';
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ Erreur HTTP ${response.status}<br>Votre instance Odoo est peut-être hors ligne ou l\'URL est incorrecte.`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    ❌ Erreur CORS détectée !<br><br>
+                    <strong>Le problème :</strong> Votre navigateur bloque la connexion.<br><br>
+                    <strong>Solutions :</strong><br>
+                    1. <strong>Vérifiez que l'extension CORS est ACTIVÉE</strong> (icône en haut à droite doit être colorée)<br>
+                    2. <strong>Rechargez cette page</strong> avec Ctrl+Shift+R (ou Cmd+Shift+R sur Mac)<br>
+                    3. <strong>OU utilisez le serveur local</strong> : double-cliquez sur LANCER_APPLICATION.bat<br><br>
+                    <strong>Erreur technique :</strong><br>
+                    <pre>${error.message}</pre>
+                `;
+            }
+
+            resultDiv.classList.remove('hidden');
+        }
+
+        function showDiagnostic() {
+            const diagnosticDiv = document.getElementById('diagnostic');
+            const url = document.getElementById('odooUrl').value.trim();
+
+            let info = '<div class="result">';
+            info += '<h4>📊 Informations de diagnostic</h4>';
+            info += '<pre>';
+            info += `Navigateur: ${navigator.userAgent}\n`;
+            info += `URL testée: ${url || '(non fournie)'}\n`;
+            info += `Protocole de la page: ${window.location.protocol}\n`;
+            info += `Hôte de la page: ${window.location.host}\n`;
+            info += `Chemin: ${window.location.pathname}\n`;
+            info += '</pre>';
+
+            info += '<h4>🔧 Recommandations</h4>';
+
+            if (window.location.protocol === 'file:') {
+                info += '<p class="error">❌ Vous utilisez le protocole file:// (ouverture directe du fichier)</p>';
+                info += '<p><strong>Solution :</strong> Utilisez LANCER_APPLICATION.bat pour lancer un serveur local (http://localhost)</p>';
+            } else if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+                info += '<p class="success">✅ Vous utilisez un serveur (http:// ou https://)</p>';
+                info += '<p>Le protocole est correct. Si vous avez toujours des erreurs, vérifiez votre URL Odoo et vos identifiants.</p>';
+            }
+
+            info += '</div>';
+            diagnosticDiv.innerHTML = info;
+            diagnosticDiv.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

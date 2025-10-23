@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lanceur Odoo Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #714B67;
+            text-align: center;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .info {
+            background: #d1ecf1;
+            border-left: 4px solid #0dcaf0;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #d1e7dd;
+            border-left: 4px solid #198754;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .btn {
+            display: inline-block;
+            background: #714B67;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .btn:hover {
+            background: #5d3c54;
+        }
+        ol, ul {
+            line-height: 1.8;
+        }
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Lanceur Odoo Assistant</h1>
+
+        <div class="warning">
+            <strong>⚠️ Vous voyez cette page ?</strong><br>
+            Cela signifie que vous avez ouvert <code>index.html</code> directement, ce qui cause l'erreur CORS.
+        </div>
+
+        <div class="info">
+            <h3>🔧 Solutions pour résoudre l'erreur "Erreur réseau" :</h3>
+
+            <h4>Option 1 : Extension navigateur + Recharger</h4>
+            <ol>
+                <li>Vérifiez que l'extension CORS est <strong>activée</strong> (icône colorée en haut à droite)</li>
+                <li>Appuyez sur <strong>Ctrl + Shift + R</strong> (ou Cmd + Shift + R sur Mac) pour recharger complètement</li>
+                <li>Retestez la connexion</li>
+            </ol>
+
+            <h4>Option 2 : Serveur local (Recommandé)</h4>
+            <p>Double-cliquez sur :</p>
+            <ul>
+                <li>Windows : <code>LANCER_APPLICATION.bat</code></li>
+                <li>Mac : <code>LANCER_APPLICATION.command</code></li>
+            </ul>
+            <p>Si Python n'est pas installé, téléchargez-le ici :</p>
+            <a href="https://www.python.org/downloads/" class="btn" target="_blank">
+                📥 Télécharger Python
+            </a>
+
+            <h4>Option 3 : Utiliser un serveur en ligne</h4>
+            <p>Je peux vous aider à déployer l'application sur un serveur gratuit (Netlify, GitHub Pages).</p>
+        </div>
+
+        <div class="success">
+            <h3>✅ Une fois que vous avez appliqué une solution :</h3>
+            <ol>
+                <li>Rechargez cette page (ou ouvrez l'application depuis le serveur)</li>
+                <li>Remplissez vos informations Odoo</li>
+                <li>Cliquez sur "Tester la connexion"</li>
+                <li>Si ça marche → Bravo ! 🎉</li>
+                <li>Si ça ne marche pas → Voir "Diagnostic avancé" ci-dessous</li>
+            </ol>
+        </div>
+
+        <hr>
+
+        <h3>🔍 Diagnostic avancé</h3>
+        <p>Si rien ne fonctionne, vérifiez :</p>
+
+        <h4>1. Votre URL Odoo est-elle correcte ?</h4>
+        <ul>
+            <li>✅ Doit commencer par <code>https://</code> (pas http://)</li>
+            <li>✅ Doit se terminer par <code>.odoo.com</code> ou votre domaine</li>
+            <li>❌ NE DOIT PAS avoir de / à la fin</li>
+            <li>Exemple correct : <code>https://monentreprise.odoo.com</code></li>
+            <li>Exemple incorrect : <code>http://monentreprise.odoo.com/</code></li>
+        </ul>
+
+        <h4>2. Pouvez-vous accéder à Odoo dans un autre onglet ?</h4>
+        <p>Ouvrez un nouvel onglet et allez sur votre URL Odoo. Si vous ne pouvez pas vous connecter, c'est que :</p>
+        <ul>
+            <li>Votre instance Odoo est hors ligne</li>
+            <li>Vous n'avez pas Internet</li>
+            <li>L'URL est incorrecte</li>
+        </ul>
+
+        <h4>3. Le nom de votre base de données est-il correct ?</h4>
+        <p>Pour trouver le nom exact :</p>
+        <ol>
+            <li>Connectez-vous à Odoo dans votre navigateur</li>
+            <li>Appuyez sur <strong>F12</strong></li>
+            <li>Cliquez sur l'onglet <strong>Console</strong></li>
+            <li>Tapez : <code>odoo.session_info.db</code></li>
+            <li>Appuyez sur Entrée</li>
+            <li>Le nom affiché est le bon !</li>
+        </ol>
+
+        <hr>
+
+        <h3>📞 Toujours bloqué ?</h3>
+        <p>Si aucune solution ne fonctionne :</p>
+        <ol>
+            <li>Notez quelle solution vous avez essayée</li>
+            <li>Faites une capture d'écran de l'erreur</li>
+            <li>Ouvrez la Console (F12) et regardez s'il y a des erreurs en rouge</li>
+            <li>Contactez le support avec ces informations</li>
+        </ol>
+
+        <a href="RESOLUTION_PROBLEME_CONNEXION.md" class="btn">
+            📖 Guide complet de dépannage
+        </a>
+    </div>
+</body>
+</html>
