@@ -1,0 +1,74 @@
+═══════════════════════════════════════════════════════════
+   🚀 ODOO ASSISTANT - APPLICATION WEB
+═══════════════════════════════════════════════════════════
+
+📌 VOUS AVEZ 2 OPTIONS :
+
+┌─────────────────────────────────────────────────────────┐
+│  OPTION 1 : METTRE EN LIGNE (RECOMMANDÉ)                │
+│  ✅ Pas de problème CORS                                │
+│  ✅ Accessible partout                                  │
+│  ✅ Gratuit pour toujours                               │
+│                                                          │
+│  👉 Lisez : DEPLOIEMENT_EN_LIGNE.md                     │
+│     (dans le dossier parent)                            │
+│                                                          │
+│  En résumé :                                            │
+│  1. Allez sur https://www.netlify.com                   │
+│  2. Créez un compte gratuit                             │
+│  3. Glissez-déposez CE DOSSIER sur Netlify              │
+│  4. Obtenez votre URL !                                 │
+│                                                          │
+│  ⏱️ Temps : 5 minutes                                   │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│  OPTION 2 : UTILISER EN LOCAL                           │
+│  ⚠️ Peut avoir des problèmes CORS                       │
+│                                                          │
+│  Windows :                                              │
+│  - Double-cliquez sur : LANCER_APPLICATION.bat          │
+│                                                          │
+│  Mac :                                                  │
+│  - Double-cliquez sur : LANCER_APPLICATION.command      │
+│                                                          │
+│  Si Python n'est pas installé :                         │
+│  - Téléchargez sur https://www.python.org/downloads/    │
+└─────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════
+
+📄 FICHIERS DANS CE DOSSIER :
+
+  index.html              → Application principale
+  app.js                  → Logique de l'application
+  odoo-client.js          → Client Odoo
+
+  LANCER_APPLICATION.bat  → Lanceur Windows
+  LANCER_APPLICATION.command → Lanceur Mac
+  LANCER_APPLICATION.py   → Serveur Python
+
+  TEST_CONNEXION.html     → Outil de diagnostic
+  AIDE.html              → Page d'aide
+
+  netlify.toml           → Config pour Netlify
+  _redirects             → Config pour déploiement
+
+═══════════════════════════════════════════════════════════
+
+❓ PROBLÈMES ?
+
+Erreur "Erreur réseau" ?
+→ Utilisez l'OPTION 1 (mettre en ligne)
+→ C'est la solution la plus simple !
+
+═══════════════════════════════════════════════════════════
+
+🎯 RECOMMANDATION :
+
+Pour éviter TOUS les problèmes techniques :
+👉 Mettez l'application EN LIGNE avec Netlify
+👉 Ça prend 5 minutes et c'est GRATUIT
+👉 Plus jamais d'erreur CORS !
+
+═══════════════════════════════════════════════════════════
