@@ -4,16 +4,38 @@
 
 Cette version web vous permet d'utiliser Odoo Assistant **directement dans votre navigateur** sans installer quoi que ce soit !
 
+## ⚠️ IMPORTANT : Problème CORS
+
+**Si vous avez l'erreur "Erreur réseau" :**
+
+C'est normal ! Quand vous ouvrez `index.html` directement, le navigateur bloque la connexion à Odoo.
+
+**🔧 SOLUTION RAPIDE (2 minutes) :**
+
+1. **Installez l'extension Chrome** "Allow CORS" : https://chrome.google.com/webstore
+2. **OU double-cliquez sur** `LANCER_APPLICATION.bat` (Windows) ou `LANCER_APPLICATION.command` (Mac)
+
+**📖 Guide complet :** Voir [RESOLUTION_PROBLEME_CONNEXION.md](./RESOLUTION_PROBLEME_CONNEXION.md)
+
+---
+
 ## Comment l'utiliser
 
-### Option 1 : Ouvrir le fichier HTML localement
+### Option 1 : Avec extension navigateur (RECOMMANDÉ)
 
-1. **Téléchargez les fichiers** du dossier `/web` :
-   - `index.html`
-   - `odoo-client.js`
-   - `app.js`
-
+1. **Installez** l'extension "Allow CORS" dans Chrome/Firefox
 2. **Ouvrez `index.html`** dans votre navigateur (double-clic)
+3. **Activez** l'extension
+4. **Configurez votre connexion Odoo** et commencez à poser des questions !
+
+### Option 2 : Avec serveur local
+
+1. **Double-cliquez** sur :
+   - Windows : `LANCER_APPLICATION.bat`
+   - Mac : `LANCER_APPLICATION.command`
+   - Linux : Lancez `python3 LANCER_APPLICATION.py`
+
+2. **Votre navigateur s'ouvre automatiquement**
 
 3. **Configurez votre connexion Odoo** et commencez à poser des questions !
 
