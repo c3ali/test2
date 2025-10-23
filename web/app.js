@@ -1,9 +1,11 @@
 /**
  * Application Web Odoo Assistant
+ * Support des modes: direct Odoo ou via proxy n8n
  */
 
 let odooClient = null;
 let messages = [];
+let useN8nMode = false;
 
 // Charger la configuration au démarrage
 window.onload = function() {
@@ -15,21 +17,56 @@ function loadConfig() {
     const savedDb = localStorage.getItem('odoo_database');
     const savedUser = localStorage.getItem('odoo_username');
     const savedPass = localStorage.getItem('odoo_password');
+    const savedUseN8n = localStorage.getItem('use_n8n') === 'true';
+    const savedN8nUrl = localStorage.getItem('n8n_url');
 
     if (savedUrl) document.getElementById('url').value = savedUrl;
     if (savedDb) document.getElementById('database').value = savedDb;
     if (savedUser) document.getElementById('username').value = savedUser;
     if (savedPass) document.getElementById('password').value = savedPass;
 
+    // Configurer le mode n8n
+    if (savedUseN8n) {
+        document.getElementById('useN8n').checked = true;
+        useN8nMode = true;
+        if (savedN8nUrl) {
+            document.getElementById('n8nUrl').value = savedN8nUrl;
+        }
+        toggleN8nMode(); // Afficher le champ n8n URL
+    }
+
     // Si tous les paramètres sont sauvegardés, aller au chat
     if (savedUrl && savedDb && savedUser && savedPass) {
+        // Si mode n8n, vérifier que l'URL n8n est présente
+        if (savedUseN8n && !savedN8nUrl) {
+            return; // Ne pas auto-charger si l'URL n8n est manquante
+        }
         showChatScreen();
-        initializeOdooClient(savedUrl, savedDb, savedUser, savedPass);
+        initializeOdooClient(savedUrl, savedDb, savedUser, savedPass, savedUseN8n, savedN8nUrl);
     }
 }
 
-function initializeOdooClient(url, database, username, password) {
-    odooClient = new OdooClient(url, database, username, password);
+function toggleN8nMode() {
+    const checkbox = document.getElementById('useN8n');
+    const n8nUrlGroup = document.getElementById('n8nUrlGroup');
+
+    useN8nMode = checkbox.checked;
+
+    if (useN8nMode) {
+        n8nUrlGroup.classList.remove('hidden');
+    } else {
+        n8nUrlGroup.classList.add('hidden');
+    }
+}
+
+function initializeOdooClient(url, database, username, password, useN8n = false, n8nUrl = null) {
+    if (useN8n && n8nUrl) {
+        console.log('🔄 Initialisation du client Odoo via n8n proxy');
+        odooClient = new OdooClientN8N(n8nUrl, url, database, username, password);
+    } else {
+        console.log('🔗 Initialisation du client Odoo en mode direct');
+        odooClient = new OdooClient(url, database, username, password);
+    }
     addWelcomeMessage();
 }
 
@@ -47,9 +84,18 @@ async function testConnection() {
     const database = document.getElementById('database').value;
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
+    const useN8n = document.getElementById('useN8n').checked;
+    const n8nUrl = document.getElementById('n8nUrl').value;
 
+    // Validation des champs requis
     if (!url || !database || !username || !password) {
-        showError('Veuillez remplir tous les champs avant de tester la connexion');
+        showError('Veuillez remplir tous les champs Odoo avant de tester la connexion');
+        return;
+    }
+
+    // Si mode n8n, vérifier que l'URL n8n est présente
+    if (useN8n && !n8nUrl) {
+        showError('Veuillez remplir l\'URL n8n pour utiliser le mode proxy');
         return;
     }
 
@@ -57,12 +103,25 @@ async function testConnection() {
     hideError();
 
     try {
-        const client = new OdooClient(url, database, username, password);
+        let client;
+        if (useN8n) {
+            console.log('🔄 Test de connexion via n8n proxy...');
+            client = new OdooClientN8N(n8nUrl, url, database, username, password);
+        } else {
+            console.log('🔗 Test de connexion directe à Odoo...');
+            client = new OdooClient(url, database, username, password);
+        }
+
         await client.authenticate();
 
-        alert(`✓ Connexion réussie !\n\nVous êtes connecté à Odoo en tant que ${username}.\n\nVous pouvez maintenant enregistrer la configuration.`);
+        const mode = useN8n ? 'via n8n proxy' : 'en mode direct';
+        alert(`✓ Connexion réussie ${mode} !\n\nVous êtes connecté à Odoo en tant que ${username}.\n\nVous pouvez maintenant enregistrer la configuration.`);
     } catch (error) {
-        showError(error.message || 'Impossible de se connecter à Odoo. Vérifiez vos paramètres.');
+        console.error('Erreur de connexion:', error);
+        const suggestion = useN8n
+            ? 'Vérifiez que votre instance n8n est bien configurée avec les webhooks Odoo.'
+            : 'Si vous rencontrez une erreur CORS, essayez d\'activer le mode n8n.';
+        showError(`${error.message || 'Impossible de se connecter à Odoo.'}\n\n${suggestion}`);
     } finally {
         setTestButtonLoading(false);
     }
@@ -73,9 +132,18 @@ function saveConfig() {
     const database = document.getElementById('database').value;
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
+    const useN8n = document.getElementById('useN8n').checked;
+    const n8nUrl = document.getElementById('n8nUrl').value;
 
+    // Validation des champs requis
     if (!url || !database || !username || !password) {
-        showError('Veuillez remplir tous les champs');
+        showError('Veuillez remplir tous les champs Odoo');
+        return;
+    }
+
+    // Si mode n8n, vérifier que l'URL n8n est présente
+    if (useN8n && !n8nUrl) {
+        showError('Veuillez remplir l\'URL n8n pour utiliser le mode proxy');
         return;
     }
 
@@ -88,9 +156,15 @@ function saveConfig() {
         localStorage.setItem('odoo_database', database);
         localStorage.setItem('odoo_username', username);
         localStorage.setItem('odoo_password', password);
+        localStorage.setItem('use_n8n', useN8n.toString());
+        if (useN8n) {
+            localStorage.setItem('n8n_url', n8nUrl);
+        } else {
+            localStorage.removeItem('n8n_url');
+        }
 
         // Initialiser le client Odoo
-        initializeOdooClient(url, database, username, password);
+        initializeOdooClient(url, database, username, password, useN8n, n8nUrl);
 
         // Afficher l'écran de chat
         setTimeout(() => {
@@ -109,9 +183,21 @@ function resetConfig() {
         localStorage.removeItem('odoo_database');
         localStorage.removeItem('odoo_username');
         localStorage.removeItem('odoo_password');
+        localStorage.removeItem('use_n8n');
+        localStorage.removeItem('n8n_url');
 
         messages = [];
         odooClient = null;
+        useN8nMode = false;
+
+        // Réinitialiser les champs du formulaire
+        document.getElementById('url').value = '';
+        document.getElementById('database').value = '';
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('useN8n').checked = false;
+        document.getElementById('n8nUrl').value = '';
+        toggleN8nMode();
 
         showConfigScreen();
     }

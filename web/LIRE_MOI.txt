@@ -58,9 +58,11 @@
 
 ❓ PROBLÈMES ?
 
-Erreur "Erreur réseau" ?
-→ Utilisez l'OPTION 1 (mettre en ligne)
-→ C'est la solution la plus simple !
+Erreur "Erreur réseau" même après mise en ligne ?
+→ C'est un problème CORS d'Odoo SaaS
+→ SOLUTION : Utilisez n8n comme proxy
+→ Lisez : GUIDE_RAPIDE_N8N.md (dans le dossier parent)
+→ Configuration en 20 minutes, résout le problème définitivement !
 
 ═══════════════════════════════════════════════════════════
 

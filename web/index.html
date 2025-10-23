@@ -250,11 +250,28 @@
                 <div class="info-box-text">
                     • URL : https://votre-domaine.odoo.com<br>
                     • Base de données : souvent le même nom que votre domaine<br>
-                    • Utilisez vos identifiants Odoo habituels
+                    • Utilisez vos identifiants Odoo habituels<br>
+                    • Si vous rencontrez des erreurs CORS, activez le mode n8n ci-dessous
                 </div>
             </div>
 
             <div id="configError" class="error hidden"></div>
+
+            <div class="input-group" style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" id="useN8n" onchange="toggleN8nMode()" style="width: auto; margin-right: 10px;">
+                    <span style="font-weight: 600;">🔄 Utiliser n8n comme proxy (résout les problèmes CORS)</span>
+                </label>
+                <div class="helper-text" style="margin-left: 28px; margin-top: 5px;">
+                    Activez cette option si vous avez des erreurs de connexion. Nécessite une instance n8n configurée.
+                </div>
+            </div>
+
+            <div id="n8nUrlGroup" class="input-group hidden">
+                <label for="n8nUrl">URL n8n *</label>
+                <input type="url" id="n8nUrl" placeholder="https://votre-instance.n8n.cloud">
+                <div class="helper-text">L'URL de votre instance n8n avec les webhooks configurés</div>
+            </div>
 
             <div class="input-group">
                 <label for="url">URL Odoo *</label>
@@ -312,6 +329,7 @@
     </div>
 
     <script src="odoo-client.js"></script>
+    <script src="odoo-client-n8n.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

@@ -27,10 +27,11 @@ Cette application est conçue pour **Odoo Online / Odoo SaaS**. Vous N'AVEZ PAS 
 ## Fonctionnalités
 
 - **Communication avec Odoo SaaS** : Connexion sécurisée à votre instance Odoo en ligne via API JSON-RPC
+- **Solution CORS intégrée** : Support du proxy n8n pour contourner les restrictions CORS d'Odoo SaaS
 - **Interface de chat intuitive** : Posez vos questions en langage naturel
 - **Interprétation intelligente** : Le système analyse vos questions et interroge les bons modèles Odoo
 - **Test de connexion** : Testez votre configuration avant de l'enregistrer
-- **Multiplateforme** : Fonctionne sur iOS et Android
+- **Multiplateforme** : Fonctionne sur iOS, Android et Web
 - **Recherches avancées** : Support de différents modèles Odoo (clients, commandes, produits, factures, etc.)
 - **100% sécurisé** : Vos identifiants restent sur votre appareil
 
@@ -189,13 +190,31 @@ Les styles sont définis dans chaque fichier de screen. Vous pouvez modifier les
 
 ## Dépannage
 
+### ❌ Erreur CORS / "Erreur réseau"
+
+**Problème le plus fréquent avec Odoo SaaS !** Odoo Online bloque les connexions depuis des domaines externes pour des raisons de sécurité.
+
+**Solutions :**
+
+**Solution recommandée : Utiliser n8n comme proxy**
+1. L'application web intègre maintenant le support n8n
+2. Suivez le guide complet : **[N8N_SETUP_GUIDE.md](./N8N_SETUP_GUIDE.md)** (30 minutes)
+3. Activez simplement la case "🔄 Utiliser n8n comme proxy" dans la configuration
+4. C'est la solution la plus robuste et professionnelle
+
+**Alternative : Version mobile (pas de CORS)**
+- L'application mobile React Native ne souffre pas de CORS
+- Utilisez Expo Go pour tester rapidement
+- **→ [Guide Mobile](./GETTING_STARTED.md)**
+
 ### ❌ Impossible de se connecter
 
 **Solutions :**
 1. Vérifiez que l'URL commence par `https://` et n'a pas de `/` final
 2. Testez l'URL dans votre navigateur - elle doit être accessible
 3. Vérifiez votre connexion Internet
-4. Essayez de passer du WiFi aux données mobiles ou vice versa
+4. Si erreur "Failed to fetch" ou "Erreur réseau" → C'est un problème CORS, voir ci-dessus
+5. Essayez de passer du WiFi aux données mobiles ou vice versa
 
 ### ❌ Identifiants incorrects
 

@@ -192,11 +192,16 @@ Après ces étapes, vous aurez une URL type : `https://votre-odoo-assistant.netl
 - Rafraîchissez la page Netlify et réessayez
 - Le dossier `web` ne doit pas dépasser 100MB (largement suffisant)
 
-### ❌ L'application se charge mais erreur Odoo
-**Solution :**
-- Vérifiez votre URL Odoo (doit commencer par https://)
-- Testez que vous pouvez accéder à Odoo dans un autre onglet
-- Vérifiez vos identifiants
+### ❌ L'application se charge mais "Erreur réseau" ou "Failed to fetch"
+**Cause :** Odoo SaaS bloque les connexions depuis Netlify (problème CORS)
+
+**Solution recommandée :** Utiliser n8n comme proxy
+1. **Lisez** : [GUIDE_RAPIDE_N8N.md](./GUIDE_RAPIDE_N8N.md) (solution en 20 minutes)
+2. **Ou lisez le guide complet** : [N8N_SETUP_GUIDE.md](./N8N_SETUP_GUIDE.md)
+3. Une fois n8n configuré, activez l'option dans l'application
+4. Plus jamais d'erreur CORS ! ✅
+
+**Alternative :** Utilisez l'application mobile (React Native), elle n'a pas de problème CORS
 
 ---
 
